@@ -5,8 +5,8 @@
 #include <PubSubClient.h>
 
 
-char ssid[] = "Zen";            // your network SSID (name)
-char pass[] = "Wisteria";        // your network password
+char ssid[] = "delameta";            // your network SSID (name)
+char pass[] = "bilano1407";        // your network password
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 unsigned long lastSend;
 
@@ -16,8 +16,9 @@ PubSubClient client(espClient);
 
 SoftwareSerial Serialx(2,3); // RX, TX   //ESP8266 RX,TX connected to these pins
 
-int relay1=4;
-int relay2=5;
+int merah=5;
+int kuning=6;
+int hijau=7;
 int Flame=A0;
 int LDR=A1;
 
@@ -28,8 +29,9 @@ Serial.begin(115200);
 Serialx.begin(9600);
 // initialize ESP module
 WiFi.init(&Serialx);
-pinMode(relay1,OUTPUT);
-pinMode(relay2,OUTPUT);
+pinMode(merah,OUTPUT);
+pinMode(kuning,OUTPUT);
+pinMode(hijau,OUTPUT);
 
 
 // check for the presence of the shield
@@ -66,33 +68,51 @@ Serial.print("Pesan diterima [");
   { 
     for (int i=0;i<length;i++) {
     char receivedChar = (char)payload[i];
-    if (receivedChar == '1'){
+    if (receivedChar == "on"){
        //Jalankan Perintah1
-       Serial.println("JALANKAN PERINTAH 1");
-       digitalWrite(relay1,LOW);
+       Serial.println("LAMPU MERAH ON");
+       digitalWrite(merah,HIGH);
     }
-    if (receivedChar == '0'){
+    if (receivedChar == "off"){
        //Jalankan Perintah0
-       Serial.println("JALANKAN PERINTAH 0");
-       digitalWrite(relay1,HIGH);
+       Serial.println("LAMPU MERAH OFF");
+       digitalWrite(merah,LOW);
     }
   }
   }
   //==============================================================
 
-  if (strcmp(topic, "zen69/lampu2") == 0) //Membandingkan 2 buah String
+  else if (strcmp(topic, "zen69/lampu2") == 0) //Membandingkan 2 buah String
   { 
     for (int i=0;i<length;i++) {
     char receivedChar = (char)payload[i];
     if (receivedChar == '1'){
        //Jalankan Perintah1
-       Serial.println("JALANKAN PERINTAH 1");
-       digitalWrite(relay2,LOW);
+       Serial.println("LAMPU KUNING ON");
+       digitalWrite(kuning,HIGH);
     }
     if (receivedChar == '0'){
        //Jalankan Perintah0
-       Serial.println("JALANKAN PERINTAH 0");
-       digitalWrite(relay2,HIGH);
+       Serial.println("LAMPU KUNING OFF");
+       digitalWrite(kuning,LOW);
+    }
+  }
+  }
+  //==============================================================
+
+  else if (strcmp(topic, "zen69/lampu3") == 0) //Membandingkan 2 buah String
+  { 
+    for (int i=0;i<length;i++) {
+    char receivedChar = (char)payload[i];
+    if (receivedChar == 'on'){
+       //Jalankan Perintah1
+       Serial.println("LAMPU HIJAU ON");
+       digitalWrite(hijau,HIGH);
+    }
+    if (receivedChar == 'off'){
+       //Jalankan Perintah0
+       Serial.println("LAMPU HIJAU OFF");
+       digitalWrite(hijau,LOW);
     }
   }
   }
@@ -143,6 +163,7 @@ Serial.println("connected");
 //client.publish("outpic","Hello World");
 client.subscribe("zen69/lampu1",0);
 client.subscribe("zen69/lampu2",0);
+client.subscribe("zen69/lampu3",0);
 
 } else {
   Serial.print("failed, rc=");
