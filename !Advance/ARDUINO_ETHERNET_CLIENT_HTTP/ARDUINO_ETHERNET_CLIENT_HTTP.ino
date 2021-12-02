@@ -14,14 +14,17 @@ char   HOST_NAME[] = "192.168.1.26"; // change to your PC's IP address
 String PATH_NAME   = "/iot/data-api.php";
 String getData;
 
-int merah=5,kuning=6;
+int merah=5,kuning=6,hijau=7;
 int Flame=A0;
 int LDR=A1;
+int IR=2;
 
 void setup() {
   Serial.begin(115200);
   pinMode(merah,OUTPUT);
   pinMode(kuning,OUTPUT);
+  pinMode(hijau,OUTPUT);
+  pinMode(IR,INPUT);
 
   //START IP DHCP
   Serial.println("Konfigurasi DHCP, Silahkan Tunggu!");
@@ -50,6 +53,7 @@ void loop() {
         sensor1=map(sensor1,900,70,100,0);
   float sensor2=analogRead(Flame);
         sensor2=map(sensor2,1024,0,0,100);
+  int   sensor3=digitalRead(IR);
   
 // make a HTTP request:
     // send HTTP header
@@ -57,7 +61,8 @@ void loop() {
     client.println(HTTP_METHOD + " " + PATH_NAME + 
                    "?namadevice=" + String(namadevice) + 
                    "&sensor1=" + String(sensor1) + 
-                   "&sensor2=" + String(sensor2) + 
+                   "&sensor2=" + String(sensor2) +
+                   "&sensor3=" + String(sensor3) + 
                    " HTTP/1.1");
     client.println("Host: " + String(HOST_NAME));
     client.println("Connection: close");
@@ -72,7 +77,7 @@ void loop() {
         Serial.println(getData);
 
         //AMBIL DATA JSON
-        const size_t capacity = JSON_OBJECT_SIZE(6) + 110; //cari dulu nilainya pakai Arduino Json 5 Asisten
+        const size_t capacity = JSON_OBJECT_SIZE(8) + 125; //cari dulu nilainya pakai Arduino Json 5 Asisten
         DynamicJsonDocument doc(capacity);
         //StaticJsonDocument<192> doc;
         DeserializationError error = deserializeJson(doc, getData);
@@ -81,16 +86,20 @@ void loop() {
         const char* namadevice_dibaca = doc["namadevice"]; // "ridwanzen"
         const char* sensor1_dibaca    = doc["sensor1"]; // "44"
         const char* sensor2_dibaca    = doc["sensor2"]; // "40"
+        const char* sensor3_dibaca    = doc["sensor3"]; // "42"
         const char* control1_dibaca   = doc["control1"]; // "0"
         const char* control2_dibaca   = doc["control2"]; // "0"
+        const char* control3_dibaca   = doc["control3"]; // "0"
         
        //POST TO SERIAL
        Serial.print("Waktu      = ");Serial.println(waktu_dibaca);
        Serial.print("Nama Device= ");Serial.println(namadevice_dibaca);
        Serial.print("Sensor 1   = ");Serial.println(sensor1_dibaca);
        Serial.print("Sensor 2   = ");Serial.println(sensor2_dibaca);
+       Serial.print("Sensor 3   = ");Serial.println(sensor3_dibaca);
        Serial.print("Control 1  = ");Serial.println(control1_dibaca);
        Serial.print("Control 2  = ");Serial.println(control2_dibaca);
+       Serial.print("Control 3  = ");Serial.println(control3_dibaca);
        Serial.println();
       
        //LOGIKA
@@ -109,6 +118,15 @@ void loop() {
         Serial.println("CONTROL 2 OFF");
         digitalWrite(kuning,LOW);
        }
+
+       if(String(control3_dibaca)=="1"){
+        Serial.println("CONTROL 3 ON");
+        digitalWrite(hijau,HIGH);
+       }else{
+        Serial.println("CONTROL 3 OFF");
+        digitalWrite(hijau,LOW);
+       }
+       
       }
       
     }
